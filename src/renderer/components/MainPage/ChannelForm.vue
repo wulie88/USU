@@ -1,5 +1,6 @@
 <template>
   <form>
+  	<label>配置: {{name}}</label>
 	<div class="form-group">
 		<label>通道功能</label>
 		<select v-model="type" class="form-control">
@@ -70,6 +71,44 @@
 	    </template>
 	</template>
 
+	<template v-else-if="type == '2'">
+	    <div class="form-group">
+	      <label>节点类型</label>
+	      <select v-model="dimmer.r0" class="form-control">
+	        <option value="0">常开</option>
+	        <option value="1">常闭</option>
+	      </select>
+	    </div>
+	    <div class="form-group">
+	      <label>调光功能</label>
+	      <select v-model="dimmer.r1" class="form-control">
+	        <option value="0">调光加开关</option>
+	        <option value="1">只调光</option>
+	      </select>
+	    </div>
+      	<div class="form-group">
+      		<label>短按反应</label>
+            <select v-model="dimmer.r2" class="form-control">
+              <option value="0">开启</option>
+		      <option value="1">关闭</option>
+		      <option value="2">反转</option>
+		      <option value="3">无动作</option>
+		    </select>
+      	</div>
+      	<div class="form-group">
+      		<label>长按反应</label>
+            <select v-model="dimmer.r3" class="form-control">
+              <option value="0">亮度增加</option>
+		      <option value="1">亮度减小</option>
+		      <option value="2">亮度循环</option>
+		    </select>
+      	</div>
+		<div class="form-group">
+			<label>长按反应时间3-255(单位100ms)</label>
+			<input  v-model="dimmer.r6" type="text" class="form-control">
+		</div>
+	</template>
+
     <footer class="form-footer">
       <label>修改后请点击保存</label>
       <button type="button" class="form-control btn btn-form btn-primary" @click="save">保存</button>
@@ -98,31 +137,66 @@
             r0: '0', // 节点类型
             r1: '0', // 短按反应
             r2: '0', // 长按反应
-            r3: 0, // 预留
+            r3: 0, // x预留
             r4: '0', // 长按反应时间
             r5: '0', // 长短按键操作对象
             r6: 2, // 防跳变输入封锁时间
-            r7: 0 // 预留
+            r7: 0 // x预留
           }
+        },
+        dimmer: {
+          r0: '0', // 节点类型
+          r1: '0', // 调光功能
+          r2: '0', // 短按反应
+          r3: '0', // 长按反应
+          r4: 0, // x预留
+          r5: '3', // 长按反应时间
+          r6: 0, // x调光模式
+          r7: 0, // x每次亮度增加
+          r8: 0, // x发送周期
+          r9: 2 // x防跳变输入封锁时间
         }
       }
     },
     props: ['name'],
     methods: {
       save () {
-        let tmp = []
+        let channelIndex = ['channelA', 'channelB', 'channelC', 'channelD'].indexOf(this.name)
+        console.log('channelIndex', channelIndex)
+
+        /**
+         * 以下yu通道无关
+         */
+        let ds = []
+        let os = []
         if (this.type === '1') {
           if (this.button.distinction === '0') {
-            tmp = Device.merge(this.button.withoutDistinction, 7)
+            // 开关--不区分
+            ds = Device.merge(this.button.withoutDistinction, 7)
+            // 只有一个通讯对象
+            os.push(new Device.CObject(Device.CObject.CWT, Device.CObject.UINT1, channelIndex, this.type))
+          } else {
+            // 开关--区分
+            ds = Device.merge(this.button.withDistinction, 8)
+            // 只有一个通讯对象
+            os.push(new Device.CObject(Device.CObject.CWT, Device.CObject.UINT1, channelIndex, this.type))
           }
+        } else if (this.type === '2') {
+          // 开关/调光
+          ds = Device.merge(this.dimmer, 10)
+          // 两个通讯对象
+          os.push(new Device.CObject(Device.CObject.CWT, Device.CObject.UINT1, channelIndex, this.type))
+          os.push(new Device.CObject(Device.CObject.CT, Device.CObject.UINT4, channelIndex, this.type))
         }
-        let ds = [parseInt(this.type)].concat(tmp)
+
+        // 合并
+        ds = [parseInt(this.type)].concat(ds)
         let ff = new Device.Fragment(this.name, 31, (f) => {
           f.batch(ds)
         })
         let f1 = Device.Frame.SetConfig(ff.title, ff.dump())
         console.log(this.name, Device.pi(f1))
-        this.$emit('listenToChild', {name: this.name, frame: f1})
+        this.$emit('listenToChild', {name: this.name, frame: f1, CObjects: os})
       }
     }
   }

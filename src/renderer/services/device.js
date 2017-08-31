@@ -45,6 +45,53 @@ Fragment.prototype.dump = function () {
   return data
 }
 
+var CObject = function (mixedKey, dataType, belongTo, deviceType) {
+  this.index = CObject.Index++
+  this.mixedKey = mixedKey
+  this.dataType = dataType
+  this.belongTo = belongTo
+  this.deviceType = deviceType
+  CObject.All.push(this)
+}
+CObject.Index = 5
+
+// DataType
+CObject.UINT1 = 0
+CObject.UINT2 = 1
+CObject.UINT3 = 2
+CObject.UINT4 = 3
+CObject.UINT5 = 4
+CObject.UINT6 = 5
+CObject.UINT7 = 6
+CObject.UINT8 = 7
+CObject.UINT16 = 8
+CObject.BYTE3 = 9
+CObject.FLOAT = 10
+CObject.DATA6 = 11
+CObject.DOUBLE = 12
+CObject.DATA10 = 13
+CObject.MAXDATA = 14
+CObject.VARDATA = 15
+
+// MixedKey
+CObject.CWT = 0x57
+CObject.CT = 0x47
+
+// Belong To
+CObject.BelongToA = 0
+CObject.BelongToB = 1
+CObject.BelongToC = 2
+CObject.BelongToD = 3
+
+// CObject Management
+CObject.All = []
+CObject.Clean = function () {
+  CObject.All = []
+}
+CObject.prototype.dump = function () {
+  return [this.index, this.byte, this.type]
+}
+
 function crc16 (bytes) {
   var bytesLength = bytes.length
   var CRC16Lo, CRC16Hi
@@ -97,11 +144,21 @@ var merge = function (ds, length) {
   return s
 }
 
+var Manager = function () {
+  this.configs = {}
+}
+Manager.prototype.update = function (name, obj) {
+  this.configs[name] = obj
+}
+var manager = new Manager()
+
 export default {
   Addr0,
   Addr1,
   Frame,
   Fragment,
+  CObject,
+  manager,
   pi,
   merge
 }

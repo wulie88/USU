@@ -19,7 +19,7 @@
     "postinstall": "npm run lint:fix"
   },
   "build": {
-    "productName": "my-project",
+    "productName": "USU",
     "appId": "org.simulatedgreg.electron-vue",
     "directories": {
       "output": "build"

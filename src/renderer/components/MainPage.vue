@@ -1,48 +1,45 @@
 <template>
-  <div class="window">
-    <div class="window-content">
-      <div class="pane-group">
-        <div class="pane-sm sidebar">
-          <nav class="nav-group">
-            <h5 class="nav-group-title">配置</h5>
-            <a v-for="(item, index) in items" @click="tab(index)" class="nav-group-item" :class="{active: activeIndex === index} ">
-              <span class="icon" :class="item.icon"></span>
-              {{item.title}}
-            </a>
-            <div class="nav-steps">
-              <button type="submit" class="btn btn-form btn-primary">下一步</button>
-            </div>
-          </nav>
-        </div>
-        <div class="pane">
-          <div v-show="activeIndex == 0">
-            <general-form @listenToChild="receivedFromClild" name="general"></general-form>
-          </div>
-          <div v-show="activeIndex == 1">
-            <channel-form @listenToChild="receivedFromClild" name="channelA"></channel-form>
-          </div>
-          <div v-show="activeIndex == 2">
-            <channel-form @listenToChild="receivedFromClild" name="channelA"></channel-form>
-          </div>
-          <div v-show="activeIndex == 3">
-            <channel-form @listenToChild="receivedFromClild" name="channelA"></channel-form>
-          </div>
-          <div v-show="activeIndex == 4">
-            <channel-form @listenToChild="receivedFromClild" name="channelA"></channel-form>
-          </div>
-          <div v-show="activeIndex == 5">
-            <combine-form @listenToChild="receivedFromClild" name="combine"></combine-form>
-          </div>
-        </div>
+<div class="pane-group">
+  <div class="pane-sm sidebar">
+    <nav class="nav-group">
+      <h5 class="nav-group-title">配置</h5>
+      <a v-for="(item, index) in items" @click="tab(index)" class="nav-group-item" :class="{active: activeIndex === index} ">
+        <span class="icon" :class="item.icon"></span>
+        {{item.title}}
+      </a>
+      <div class="nav-steps">
+        <p>进度: {{ configedCount }}/6</p>
+        <button @click="next" type="button" class="btn btn-form btn-disable" :class="{'btn-primary': configedCount === 6}">下一步</button>
       </div>
-    </div>
-    <footer class="toolbar toolbar-footer">
-      <h1 class="title">Footer</h1>
-    </footer>
+    </nav>
   </div>
+
+  <div class="pane">
+    <div v-show="activeIndex == 0">
+      <general-form @listenToChild="receivedFromClild" name="general"></general-form>
+    </div>
+    <div v-show="activeIndex == 1">
+      <channel-form @listenToChild="receivedFromClild" name="channelA"></channel-form>
+    </div>
+    <div v-show="activeIndex == 2">
+      <channel-form @listenToChild="receivedFromClild" name="channelB"></channel-form>
+    </div>
+    <div v-show="activeIndex == 3">
+      <channel-form @listenToChild="receivedFromClild" name="channelC"></channel-form>
+    </div>
+    <div v-show="activeIndex == 4">
+      <channel-form @listenToChild="receivedFromClild" name="channelD"></channel-form>
+    </div>
+    <div v-show="activeIndex == 5">
+      <combine-form @listenToChild="receivedFromClild" name="combine"></combine-form>
+    </div>
+  </div>
+
+</div>
 </template>
 
 <script>
+  import Device from '@/services/device'
   import SystemInformation from './LandingPage/SystemInformation'
   import GeneralForm from './MainPage/GeneralForm'
   import CombineForm from './MainPage/CombineForm'
@@ -54,7 +51,7 @@
     data () {
       return {
         activeIndex: 0,
-        settings: {},
+        configedCount: 0,
         items: [
           {title: '通用', icon: 'icon-publish'},
           {title: '通道A', icon: 'icon-window'},
@@ -66,6 +63,7 @@
       }
     },
     mounted () {
+      Device.CObject.Clean()
       console.log(this.$refs)
     },
     methods: {
@@ -74,11 +72,14 @@
         // this.currentView = this.items[index].content
       },
       receivedFromClild (msg) {
-        this.settings[this.activeIndex] = msg
+        Device.manager.update(msg.name, msg)
+        this.configedCount = Object.keys(Device.manager.configs).length
         console.log('receivedFromClild', msg)
       },
-      open (link) {
-        this.$electron.shell.openExternal(link)
+      next () {
+        if (this.configedCount === 6) {
+          this.$router.push('/grouping')
+        }
       }
     }
   }
@@ -86,4 +87,5 @@
 
 <style>
 .nav-steps { padding: 15px 30px; }
+.nav-steps p { text-align: center; }
 </style>

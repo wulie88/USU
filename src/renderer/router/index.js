@@ -11,6 +11,11 @@ export default new Router({
       component: require('@/components/LandingPage')
     },
     {
+      path: '/grouping',
+      name: 'grouping-page',
+      component: require('@/components/GroupingPage')
+    },
+    {
       path: '/',
       name: 'main-page',
       component: require('@/components/MainPage')
