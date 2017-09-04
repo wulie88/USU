@@ -145,10 +145,11 @@ var merge = function (ds, length) {
 }
 
 var Manager = function () {
-  this.configs = {}
+  this.configs = JSON.parse(window.localStorage.getItem('configs')) || {}
 }
 Manager.prototype.update = function (name, obj) {
   this.configs[name] = obj
+  window.localStorage.setItem('configs', JSON.stringify(this.configs))
 }
 var manager = new Manager()
 
