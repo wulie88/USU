@@ -25,8 +25,8 @@
         }, {
           type: 'checkbox',
           name: 'numberLimitEnable',
-          title: '报文数量限制',
-          val: false
+          title: '不限制报文数量',
+          val: true
         }, {
           type: 'input',
           name: 'numberLimitMax',
@@ -75,12 +75,7 @@
     methods: {
       save () {
         let d = [parseInt(this.formData[0].val), this.formData[1].val + 0, parseInt(this.formData[2].val), parseInt(this.formData[3].val), this.formData[4].val + 0, parseInt(this.formData[5].val)]
-        let ff = new Device.Fragment('general', 0x10, (f) => {
-          f.batch(d)
-        })
-        let f1 = Device.Frame.SetConfig(ff.title, ff.dump())
-        console.log(this.name, Device.pi(f1))
-        this.$emit('listenToChild', {name: this.name, frame: f1})
+        this.$emit('submitFrameConfig', new Device.FrameConfig(this.name, d))
       }
     }
   }

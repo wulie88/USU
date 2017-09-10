@@ -52,12 +52,7 @@
     methods: {
       save () {
         let d = [parseInt(this.formData[0].val), parseInt(this.formData[1].val), parseInt(this.formData[2].val), parseInt(this.formData[3].val)]
-        let ff = new Device.Fragment(this.name, 0x10, (f) => {
-          f.batch(d)
-        })
-        let f1 = Device.Frame.SetConfig(ff.title, ff.dump())
-        console.log(this.name, Device.pi(f1))
-        this.$emit('listenToChild', {name: this.name, frame: f1})
+        this.$emit('submitFrameConfig', new Device.FrameConfig(this.name, d))
       }
     }
   }

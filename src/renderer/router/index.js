@@ -6,9 +6,9 @@ Vue.use(Router)
 export default new Router({
   routes: [
     {
-      path: '/landing',
-      name: 'landing-page',
-      component: require('@/components/LandingPage')
+      path: '/result',
+      name: 'result-page',
+      component: require('@/components/ResultPage')
     },
     {
       path: '/grouping',

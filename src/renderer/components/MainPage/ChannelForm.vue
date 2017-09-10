@@ -6,8 +6,6 @@
 		<select v-model="type" class="form-control">
 		  <option value="1">开关</option>
 		  <option value="2">开关/调光</option>
-		  <option value="3">窗帘</option>
-		  <option value="4">发送固定值</option>
 		</select>
 	</div>
 	<template v-if="type == '1'">
@@ -172,12 +170,12 @@
         if (this.type === '1') {
           if (this.button.distinction === '0') {
             // 开关--不区分
-            ds = Device.merge(this.button.withoutDistinction, 7)
+            ds = [0].concat(Device.merge(this.button.withoutDistinction, 7))
             // 只有一个通讯对象
             os.push(new Device.CObject(Device.CObject.CWT, Device.CObject.UINT1, channelIndex, this.type))
           } else {
             // 开关--区分
-            ds = Device.merge(this.button.withDistinction, 8)
+            ds = [0].concat(Device.merge(this.button.withDistinction, 8))
             // 只有一个通讯对象
             os.push(new Device.CObject(Device.CObject.CWT, Device.CObject.UINT1, channelIndex, this.type))
           }
@@ -191,12 +189,7 @@
 
         // 合并
         ds = [parseInt(this.type)].concat(ds)
-        let ff = new Device.Fragment(this.name, 31, (f) => {
-          f.batch(ds)
-        })
-        let f1 = Device.Frame.SetConfig(ff.title, ff.dump())
-        console.log(this.name, Device.pi(f1))
-        this.$emit('listenToChild', {name: this.name, frame: f1, CObjects: os})
+        this.$emit('submitFrameConfig', new Device.FrameConfig(this.name, ds, os))
       }
     }
   }

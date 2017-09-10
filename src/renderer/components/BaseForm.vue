@@ -3,7 +3,7 @@
     <div v-for="(item, index) in formData">
       <div v-if="item.type === 'input'" class="form-group">
         <label>{{item.title}}</label>
-        <input v-model='item.val' type="email" class="form-control" placeholder="Email">
+        <input v-model='item.val' type="text" class="form-control" placeholder="Email">
       </div>
 
       <div v-if="item.type === 'checkbox'" class="checkbox">

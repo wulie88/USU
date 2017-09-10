@@ -18,6 +18,27 @@ Frame.SetAddr = function (comment) {
   return new Frame(comment, Frame.CM_SetAddr, [Addr0, Addr1])
 }
 
+var FrameConfig = function (name, originalData, objs) {
+  let name2code = {'general': 16, 'channelA': 31, 'channelB': 66, 'channelC': 101, 'channelD': 136, 'combine': 171, 'group': 192, 'group2objs': 351}
+  this.name = name
+  this.od = originalData
+  this.objs = objs || []
+  this.start = name2code[this.name]
+}
+FrameConfig.prototype.dump = function () {
+  let that = this
+  let ff = new Fragment(this.name, this.start, (f) => {
+    f.batch(that.od)
+    that.objs.forEach(function (obj) {
+      console.log('obj.dump()', obj.dump())
+      f.batch(obj.dump())
+    })
+  })
+  let f1 = Frame.SetConfig(ff.title, ff.dump())
+  console.log(this.name, pi(f1))
+  return pi(f1)
+}
+
 var Fragment = function (comment, base, func) {
   this.title = comment
   this.base = base
@@ -46,14 +67,14 @@ Fragment.prototype.dump = function () {
 }
 
 var CObject = function (mixedKey, dataType, belongTo, deviceType) {
-  this.index = CObject.Index++
+  this.id = CObject.Id++
   this.mixedKey = mixedKey
   this.dataType = dataType
   this.belongTo = belongTo
   this.deviceType = deviceType
   CObject.All.push(this)
 }
-CObject.Index = 5
+CObject.Id = 5
 
 // DataType
 CObject.UINT1 = 0
@@ -87,9 +108,151 @@ CObject.BelongToD = 3
 CObject.All = []
 CObject.Clean = function () {
   CObject.All = []
+  CObject.Id = 5
+}
+CObject.FindObjById = function (id) {
+  let found = null
+  CObject.All.forEach(function (e) {
+    if (e.id === id) {
+      found = e
+    }
+  })
+
+  return found
+}
+CObject.prototype.groups = function () {
+  let results = []
+  CGroup.FindGroupByObjId(CGroup.Root, this.id, results)
+  return results
+}
+CObject.prototype.groupAddrs = function () {
+  let groups = this.groups()
+  console.log('groups', groups, this.id)
+  let addrs = []
+  groups.forEach(function (g) {
+    addrs.push(g.addr())
+  })
+  return addrs.join(', ')
 }
 CObject.prototype.dump = function () {
-  return [this.index, this.byte, this.type]
+  return [this.index, this.mixedKey, this.dataType]
+}
+
+var CGroup = function (parentId, name, value) {
+  let parent = CGroup.FindGroupById(CGroup.Root, parentId)
+  this.parentId = parentId
+  this.id = CGroup.Id
+  this.name = name
+  this.subs = []
+  this.level = 0
+  this.value = value || 0
+  this.includes = []
+  if (parent) {
+    this.level = parent.level + 1
+    this.parent = parent
+    parent.addSub(this)
+  }
+  CGroup.Id++
+}
+CGroup.Id = 0
+CGroup.Root = null
+CGroup.Clean = function () {
+  CGroup.Id = 0
+  CGroup.Root = null
+  CGroup.Root = new CGroup(-1, 'Root')
+}
+CGroup.Dump = function () {
+  let groups = []
+  CGroup.DumpItem(CGroup.Root, groups)
+  return groups
+}
+CGroup.DumpItem = function (root, groups) {
+  for (var i = 0; i < root.subs.length; i++) {
+    let group = root.subs[i]
+    groups.push(group)
+    CGroup.DumpItem(group, groups)
+  }
+}
+CGroup.RemoveGroupById = function (id) {
+  var g = CGroup.FindGroupById(CGroup.Root, id)
+  g.parent.subs = g.parent.subs.filter(item => item !== g)
+}
+CGroup.FindGroupById = function (root, id) {
+  if (!root) {
+    return null
+  }
+  console.log('FindGroupById', root.id, id)
+
+  // self
+  if (root.id === id) {
+    return root
+  }
+
+  // subs
+  let subs = root.subs
+  for (var i = 0; i < root.subs.length; i++) {
+    let group = subs[i]
+    let r = CGroup.FindGroupById(group, id)
+    if (r) {
+      return r
+    }
+  }
+}
+CGroup.FindGroupByObjId = function (root, objId, results) {
+  if (!root) {
+    return
+  }
+
+  // self
+  if (root.includes.indexOf(objId) !== -1) {
+    results.push(root)
+  }
+
+  // subs
+  let subs = root.subs
+  for (var i = 0; i < root.subs.length; i++) {
+    let group = subs[i]
+    CGroup.FindGroupByObjId(group, objId, results)
+  }
+}
+CGroup.prototype.addr = function (sub) {
+  let addr = []
+  var parent = this
+  while (parent) {
+    addr.unshift(parent.value)
+    parent = parent.parent
+  }
+  return addr.join('.')
+}
+CGroup.prototype.codeAddr = function (sub) {
+  let addr = []
+  var parent = this
+  while (parent) {
+    addr.unshift(parent.value)
+    parent = parent.parent
+  }
+  return addr.slice(2)
+}
+CGroup.prototype.addSub = function (sub) {
+  this.subs.push(sub)
+}
+CGroup.prototype.addObj = function (id) {
+  if (this.includes.indexOf(id) !== -1) {
+    return
+  }
+  this.includes.push(id)
+}
+CGroup.prototype.removeObj = function (id) {
+  this.includes = this.includes.filter(item => item !== id)
+}
+CGroup.prototype.includeObjs = function () {
+  let objs = []
+  this.includes.forEach(function (e) {
+    let obj = CObject.FindObjById(e)
+    objs.push(obj)
+  })
+
+  return objs
 }
 
 function crc16 (bytes) {
@@ -145,11 +308,45 @@ var merge = function (ds, length) {
 }
 
 var Manager = function () {
-  this.configs = JSON.parse(window.localStorage.getItem('configs')) || {}
+  this.configs = [] // JSON.parse(window.localStorage.getItem('configs')) || {}
 }
+Manager.Names = ['general', 'channelA', 'channelB', 'channelC', 'channelD', 'combine', 'group', 'group2objs']
 Manager.prototype.update = function (name, obj) {
   this.configs[name] = obj
   window.localStorage.setItem('configs', JSON.stringify(this.configs))
+}
+Manager.prototype.configedCount = function () {
+  console.log('Object.keys(this.configs)', Object.keys(this.configs))
+  return Object.keys(this.configs).length
+}
+Manager.prototype.allCObjects = function () {
+  var that = this
+  let s = 5
+  let objs = []
+  Manager.Names.forEach(function (name) {
+    let cfg = that.configs[name]
+    if (!cfg) {
+      return
+    }
+    cfg.objs.forEach(function (obj) {
+      obj.index = s++
+      objs.push(obj)
+    })
+  })
+  console.log('allCObjects', objs)
+  return objs
+}
+Manager.prototype.dump = function () {
+  var that = this
+  let cfgs = []
+  Manager.Names.forEach(function (name) {
+    let cfg = that.configs[name]
+    if (!cfg) {
+      return
+    }
+    cfgs.push(cfg)
+  })
+  return cfgs
 }
 var manager = new Manager()
 
@@ -157,8 +354,10 @@ export default {
   Addr0,
   Addr1,
   Frame,
+  FrameConfig,
   Fragment,
   CObject,
+  CGroup,
   manager,
   pi,
   merge
