@@ -68,6 +68,7 @@
     },
     mounted () {
       Device.CObject.Clean()
+      Device.manager.reset()
     },
     methods: {
       tab (index) {

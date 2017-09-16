@@ -8,6 +8,7 @@
 		  <option value="2">开关/调光</option>
 		</select>
 	</div>
+	<!-- 开关 -->
 	<template v-if="type == '1'">
 	    <div class="form-group">
 	      <label>长短按键区分</label>
@@ -16,6 +17,7 @@
 	        <option value="1">区分</option>
 	      </select>
 	    </div>
+	    <!-- 不区分 -->
 	    <template v-if="button.distinction == '0'">
 	      	<div class="form-group">
 	      		<label>触点闭合动作（上升沿）</label>
@@ -36,6 +38,7 @@
 			    </select>
 	      	</div>
 	    </template>
+	    <!-- 区分 -->
 	    <template v-else>
 	      	<div class="form-group">
 	      		<label>节点类型</label>
@@ -66,9 +69,17 @@
 				<label>长按反应时间2-255(单位100ms)</label>
 				<input  v-model="button.withDistinction.r3" type="text" class="form-control">
 			</div>
+	      	<div class="form-group">
+	      		<label>长按反应</label>
+	            <select v-model="button.withDistinction.r4" class="form-control">
+	              <option value="0">1个</option>
+			      <option value="1">2个</option>
+			    </select>
+	      	</div>
 	    </template>
 	</template>
 
+	<!-- 开关/调光 -->
 	<template v-else-if="type == '2'">
 	    <div class="form-group">
 	      <label>节点类型</label>
@@ -122,7 +133,7 @@
         type: '1',
         button: {
           distinction: '0',
-          withoutDistinction: {
+          withoutDistinction: { // 不区分
             r0: 0, // 预留
             r1: '3', // 触点闭合动作（上升沿）
             r2: '2', // 触点打开动作（下降沿）
@@ -131,7 +142,7 @@
             r5: 0, // 预留
             r6: 0 // 预留
           },
-          withDistinction: {
+          withDistinction: { // 区分
             r0: '0', // 节点类型
             r1: '0', // 短按反应
             r2: '0', // 长按反应
@@ -176,15 +187,26 @@
           } else {
             // 开关--区分
             ds = [0].concat(Device.merge(this.button.withDistinction, 8))
-            // 只有一个通讯对象
-            os.push(new Device.CObject(Device.CObject.CWT, Device.CObject.UINT1, channelIndex, this.type))
+            if (this.button.withDistinction.r5 === '0') {
+              // 只有一个通讯对象
+              os.push(new Device.CObject(Device.CObject.CWT, Device.CObject.UINT1, channelIndex, this.type))
+            } else {
+              // 两个通讯对象
+              os.push(new Device.CObject(Device.CObject.CWT, Device.CObject.UINT1, channelIndex, this.type))
+              os.push(new Device.CObject(Device.CObject.CWT, Device.CObject.UINT1, channelIndex, this.type))
+            }
           }
         } else if (this.type === '2') {
           // 开关/调光
           ds = Device.merge(this.dimmer, 10)
-          // 两个通讯对象
-          os.push(new Device.CObject(Device.CObject.CWT, Device.CObject.UINT1, channelIndex, this.type))
-          os.push(new Device.CObject(Device.CObject.CT, Device.CObject.UINT4, channelIndex, this.type))
+          if (this.dimmer.r1 === '0') { // 调光+开关
+            // 两个通讯对象
+            os.push(new Device.CObject(Device.CObject.CWT, Device.CObject.UINT1, channelIndex, this.type))
+            os.push(new Device.CObject(Device.CObject.CT, Device.CObject.UINT4, channelIndex, this.type))
+          } else {
+            // 只有调光
+            os.push(new Device.CObject(Device.CObject.CT, Device.CObject.UINT4, channelIndex, this.type))
+          }
         }
 
         // 合并

@@ -151,12 +151,12 @@
       addObjToGroup: function (objId) {
         if (this.activedGroup.level === 3) {
           this.activedGroup.addObj(objId)
-          this.reload()
+          this.activeGroup(this.activedId)
         }
       },
       removeObjFromGroup: function (objId) {
         this.activedGroup.removeObj(objId)
-        this.reload()
+        this.activeGroup(this.activedId)
       },
       reload: function () {
         this.activedId = 0

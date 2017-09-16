@@ -38,6 +38,14 @@ FrameConfig.prototype.dump = function () {
   console.log(this.name, pi(f1))
   return pi(f1)
 }
+var FrameAddr = function () {
+  this.name = 'addr'
+}
+FrameAddr.prototype.dump = function () {
+  let f1 = Frame.SetAddr(this.name)
+  console.log(this.name, pi(f1))
+  return pi(f1)
+}
 
 var Fragment = function (comment, base, func) {
   this.title = comment
@@ -222,16 +230,19 @@ CGroup.prototype.addr = function (sub) {
     addr.unshift(parent.value)
     parent = parent.parent
   }
-  return addr.join('.')
+  return addr.slice(1).join('.')
 }
 CGroup.prototype.codeAddr = function (sub) {
   let addr = []
   var parent = this
   while (parent) {
-    addr.unshift(parent.value)
+    addr.unshift(parseInt(parent.value))
     parent = parent.parent
   }
-  return addr.slice(2)
+  addr = addr.slice(1)
+  let ds = [addr[0] << 3 | addr[1], addr[2]]
+  console.log('codeAddr', addr, ds)
+  return ds
 }
 CGroup.prototype.addSub = function (sub) {
   this.subs.push(sub)
@@ -308,12 +319,15 @@ var merge = function (ds, length) {
 }
 
 var Manager = function () {
+  this.reset()
+}
+Manager.Names = ['addr', 'general', 'channelA', 'channelB', 'channelC', 'channelD', 'combine', 'group', 'group2objs']
+Manager.prototype.reset = function () {
   this.configs = [] // JSON.parse(window.localStorage.getItem('configs')) || {}
 }
-Manager.Names = ['general', 'channelA', 'channelB', 'channelC', 'channelD', 'combine', 'group', 'group2objs']
 Manager.prototype.update = function (name, obj) {
   this.configs[name] = obj
-  window.localStorage.setItem('configs', JSON.stringify(this.configs))
+  // window.localStorage.setItem('configs', JSON.stringify(this.configs))
 }
 Manager.prototype.configedCount = function () {
   console.log('Object.keys(this.configs)', Object.keys(this.configs))
@@ -335,6 +349,11 @@ Manager.prototype.allCObjects = function () {
   })
   console.log('allCObjects', objs)
   return objs
+}
+Manager.prototype.setAddr = function (addr0, addr1) {
+  Addr0 = addr0
+  Addr1 = addr1
+  this.update('addr', new FrameAddr())
 }
 Manager.prototype.dump = function () {
   var that = this
