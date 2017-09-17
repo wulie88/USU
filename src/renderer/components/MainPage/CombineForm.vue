@@ -18,6 +18,21 @@
     data () {
       return {
         formData: [{
+          type: 'checkbox',
+          name: 'ABKey',
+          title: 'A+B组合',
+          val: true
+        }, {
+          type: 'checkbox',
+          name: 'BCKey',
+          title: 'B+C组合',
+          val: true
+        }, {
+          type: 'checkbox',
+          name: 'CDKey',
+          title: 'C+D组合',
+          val: true
+        }, {
           type: 'input',
           name: 'daley',
           title: '按键等待延时1-255(0.1s为单位)',
@@ -27,32 +42,47 @@
           name: 'buttonSendKey',
           title: '按键发送值',
           data: {0: '开启', 1: '关闭', 2: '反转', 3: '发送2bit固定值', 4: '发送1bit固定值'},
-          val: 0
+          val: 2
         }, {
           type: 'select',
           name: 'ABSendKey',
           title: 'A+B发送值',
           data: {0: '开启', 1: '关闭', 2: '反转', 3: '发送2bit固定值', 4: '发送1bit固定值'},
-          val: 0
+          val: 2
         }, {
           type: 'select',
           name: 'BCSendKey',
           title: 'B+C发送值',
           data: {0: '开启', 1: '关闭', 2: '反转', 3: '发送2bit固定值', 4: '发送1bit固定值'},
-          val: 0
+          val: 2
         }, {
           type: 'select',
           name: 'CDSendKey',
           title: 'C+D发送值',
           data: {0: '开启', 1: '关闭', 2: '反转', 3: '发送2bit固定值', 4: '发送1bit固定值'},
-          val: 0
+          val: 2
         }]
       }
     },
     methods: {
       save () {
-        let d = [parseInt(this.formData[0].val), parseInt(this.formData[1].val), parseInt(this.formData[2].val), parseInt(this.formData[3].val)]
-        this.$emit('submitFrameConfig', new Device.FrameConfig(this.name, d))
+        let ABKey = this.formData[0].val
+        let BCKey = this.formData[1].val
+        let CDKey = this.formData[2].val
+        let a = ABKey << 0 | BCKey << 1 | CDKey << 2
+        let ds = [a, parseInt(this.formData[3].val), parseInt(this.formData[4].val), parseInt(this.formData[5].val), parseInt(this.formData[6].val), parseInt(this.formData[7].val), 0, 0, 0]
+        let os = []
+        if (ABKey) {
+          os.push(new Device.CObject(Device.CObject.CWT, Device.CObject.UINT1, Device.CObject.BelongToCombine, 'ABKey'))
+        }
+        if (BCKey) {
+          os.push(new Device.CObject(Device.CObject.CWT, Device.CObject.UINT1, Device.CObject.BelongToCombine, 'BCKey'))
+        }
+        if (CDKey) {
+          os.push(new Device.CObject(Device.CObject.CWT, Device.CObject.UINT1, Device.CObject.BelongToCombine, 'CDKey'))
+        }
+        console.log(ds)
+        this.$emit('submitFrameConfig', new Device.FrameConfig(this.name, ds, os))
       }
     }
   }

@@ -3,9 +3,11 @@
 	<section class="objs">
 	  <div class="table">
 		<header class="table-header">
-			<span class="t0">Index</span>
-			<span class="t1">Channel</span>
-			<span class="t2">Type</span>
+			<span class="t0">序号</span>
+			<span class="t1">属于</span>
+      <span class="t2">类型</span>
+      <span class="t1">配置字</span>
+      <span class="t1">数据类型</span>
 			<span class="t3">Group Addr</span>
       <span class="t0">操作</span>
 		</header>
@@ -14,7 +16,9 @@
 				<li v-for="obj in objs">
 					<span class="t0">{{obj.id}}</span>
 					<span class="t1">{{obj.belongTo | channel}}</span>
-					<span class="t2">{{obj.deviceType | stringDeviceType}}</span>
+          <span class="t2">{{obj.comment}}</span>
+					<span class="t1">{{obj.mixedKey | stringMixedKey}}</span>
+          <span class="t1">{{obj.dataType | stringDataType}}</span>
 					<span class="t3">{{obj | groupAddrs}}</span>
           <span class="t0"><i @click="addObjToGroup(obj.id)" class="icon icon-plus-circled"></i></span>
 				</li>
@@ -50,7 +54,7 @@
         <li v-for="obj in activedGroupIncludes">
           <span class="t0">{{obj.id}}</span>
           <span class="t1">{{obj.belongTo | channel}}</span>
-          <span class="t2">{{obj.deviceType | stringDeviceType}}</span>
+          <span class="t2">{{obj.comment}}</span>
           <span class="t0"><i @click="removeObjFromGroup(obj.id)" class="icon icon-cancel-circled"></i></span>
         </li>
       </ul>
@@ -183,10 +187,22 @@
     },
     filters: {
       channel: function (index) {
-        return ['channelA', 'channelB', 'channelC', 'channelD'][index]
+        return ['channelA', 'channelB', 'channelC', 'channelD', '组合按键'][index]
       },
       stringDeviceType: function (index) {
-        return ['-', '开关', '开关/调光'][index]
+        return ['-', '开关', '开关/调光', '窗帘'][index]
+      },
+      stringMixedKey: function (index) {
+        let d = {}
+        d[Device.CObject.CWT] = 'CWT'
+        d[Device.CObject.CT] = 'CT'
+        return d[index]
+      },
+      stringDataType: function (index) {
+        let d = {}
+        d[Device.CObject.UINT1] = 'UINT1'
+        d[Device.CObject.UINT4] = 'UINT4'
+        return d[index]
       },
       groupAddrs: function (obj) {
         console.log('filters:groupAddrs', obj.groupAddrs())
@@ -212,7 +228,7 @@
   .table-body li {border-bottom: 1px solid #ddd;}
   .t0 { width: 80px; }
   .t1 { width: 100px; }
-  .t2 { width: 100px; }
+  .t2 { width: 150px; }
   .t3 { width: 300px; }
   .groups {display: flex;}
   .groups aside { width: 40%; height: 100%; box-sizing: border-box; border-right: 1px solid #ddd; padding: 10px; background: #f5f5f4; overflow-y: auto; }

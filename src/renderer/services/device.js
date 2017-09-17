@@ -1,6 +1,20 @@
 let Addr0 = 0x11
 let Addr1 = 0x0D
 
+// example
+/*
+N1=H,AA 04 A1 11 0D 9D 63
+N2=H,AA 0D A3 11 0D 00 10 05 02 01 14 07 02 01 4A 1A
+N3=H,AA 13 A3 11 0D 00 1F 0B 01 00 00 03 02 00 01 07 00 05 57 00 18 9B
+N4=H,AA 18 A3 11 0D 00 42 10 02 00 00 02 02 00 05 00 00 05 02 06 57 00 07 47 03 63 35
+N5=H,AA 15 A3 11 0D 00 65 0D 03 00 00 00 00 05 03 02 08 57 00 09 47 00 05 4B
+N6=H,AA 1D A3 11 0D 00 88 15 04 00 00 02 00 00 00 00 00 00 00 00 00 00 02 02 0A 47 07 FF 00 FF 33 6D
+N7=H,AA 19 A3 11 0D 00 AB 11 07 02 02 00 00 00 00 00 00 0B 57 00 0C 57 00 0D 57 00 62 27
+N8=H,AA 1D A3 11 0D 00 C0 15 00 01 01 00 02 00 00 02 01 02 00 03 04 00 00 04 01 01 02 01 03 01 12 91
+N9=H,AA 1B A3 11 0D 01 5F 13 01 05 02 06 03 07 04 08 05 09 08 0A 09 0B 0A 0C 06 0D 07 06 29 0D
+N10=H,AA 04 5A 11 0D EC 92
+*/
+
 var Frame = function (comment, command, data) {
   this.comment = comment
   // all data [0xaa, length, 0xa1, d, d, ch, cl]
@@ -74,12 +88,20 @@ Fragment.prototype.dump = function () {
   return data
 }
 
-var CObject = function (mixedKey, dataType, belongTo, deviceType) {
+/**
+ * 通讯对象
+ *
+ * mixedKey: 通讯对象配置字
+ * dataType: 通讯对象数据类型
+ * belongTo: 属于哪个配置, 如: 通道A 通道B 通道C 通道D 组合按键
+ * comment: 设备备注, 如: 开关、开光/调光、窗帘
+ */
+var CObject = function (mixedKey, dataType, belongTo, comment) {
   this.id = CObject.Id++
   this.mixedKey = mixedKey
   this.dataType = dataType
   this.belongTo = belongTo
-  this.deviceType = deviceType
+  this.comment = comment
   CObject.All.push(this)
 }
 CObject.Id = 5
@@ -111,6 +133,7 @@ CObject.BelongToA = 0
 CObject.BelongToB = 1
 CObject.BelongToC = 2
 CObject.BelongToD = 3
+CObject.BelongToCombine = 4
 
 // CObject Management
 CObject.All = []

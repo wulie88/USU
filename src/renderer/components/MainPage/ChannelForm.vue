@@ -6,6 +6,7 @@
 		<select v-model="type" class="form-control">
 		  <option value="1">开关</option>
 		  <option value="2">开关/调光</option>
+		  <option value="3">窗帘</option>
 		</select>
 	</div>
 	<!-- 开关 -->
@@ -67,11 +68,11 @@
 	      	</div>
 			<div class="form-group">
 				<label>长按反应时间2-255(单位100ms)</label>
-				<input  v-model="button.withDistinction.r3" type="text" class="form-control">
+				<input  v-model="button.withDistinction.r4" type="text" class="form-control">
 			</div>
 	      	<div class="form-group">
-	      		<label>长按反应</label>
-	            <select v-model="button.withDistinction.r4" class="form-control">
+	      		<label>长短按键操作对象</label>
+	            <select v-model="button.withDistinction.r5" class="form-control">
 	              <option value="0">1个</option>
 			      <option value="1">2个</option>
 			    </select>
@@ -114,7 +115,30 @@
       	</div>
 		<div class="form-group">
 			<label>长按反应时间3-255(单位100ms)</label>
-			<input  v-model="dimmer.r6" type="text" class="form-control">
+			<input  v-model="dimmer.r5" type="text" class="form-control">
+		</div>
+	</template>
+
+	<!-- 窗帘 -->
+	<template v-else-if="type == '3'">
+	    <div class="form-group">
+	      <label>节点类型</label>
+	      <select v-model="curtain.r1" class="form-control">
+	        <option value="0">常开</option>
+	        <option value="1">常闭</option>
+	      </select>
+	    </div>
+      	<div class="form-group">
+      		<label>长按反应</label>
+            <select v-model="curtain.r3" class="form-control">
+              <option value="0">上升</option>
+		      <option value="1">下降</option>
+		      <option value="2">反转</option>
+		    </select>
+      	</div>
+		<div class="form-group">
+			<label>长按反应时间3-255(单位100ms)</label>
+			<input  v-model="curtain.r4" type="text" class="form-control">
 		</div>
 	</template>
 
@@ -143,11 +167,11 @@
             r6: 0 // 预留
           },
           withDistinction: { // 区分
-            r0: '0', // 节点类型
-            r1: '0', // 短按反应
-            r2: '0', // 长按反应
+            r0: '1', // 节点类型
+            r1: '2', // 短按反应
+            r2: '2', // 长按反应
             r3: 0, // x预留
-            r4: '0', // 长按反应时间
+            r4: '2', // 长按反应时间
             r5: '0', // 长短按键操作对象
             r6: 2, // 防跳变输入封锁时间
             r7: 0 // x预留
@@ -156,14 +180,23 @@
         dimmer: {
           r0: '0', // 节点类型
           r1: '0', // 调光功能
-          r2: '0', // 短按反应
-          r3: '0', // 长按反应
+          r2: '2', // 短按反应
+          r3: '2', // 长按反应
           r4: 0, // x预留
           r5: '3', // 长按反应时间
           r6: 0, // x调光模式
           r7: 0, // x每次亮度增加
           r8: 0, // x发送周期
           r9: 2 // x防跳变输入封锁时间
+        },
+        curtain: {
+          r0: 0, // 操作功能
+          r1: '0', // 节点类型
+          r2: 0, // 短按反应
+          r3: '2', // 长按反应
+          r4: '3', // 长按反应时间
+          r5: 0, // 停止/调整信息发送周期
+          r6: 2, // 防跳变输入封锁时间
         }
       }
     },
@@ -183,17 +216,17 @@
             // 开关--不区分
             ds = [0].concat(Device.merge(this.button.withoutDistinction, 7))
             // 只有一个通讯对象
-            os.push(new Device.CObject(Device.CObject.CWT, Device.CObject.UINT1, channelIndex, this.type))
+            os.push(new Device.CObject(Device.CObject.CWT, Device.CObject.UINT1, channelIndex, '开关'))
           } else {
             // 开关--区分
-            ds = [0].concat(Device.merge(this.button.withDistinction, 8))
+            ds = [1].concat(Device.merge(this.button.withDistinction, 8))
             if (this.button.withDistinction.r5 === '0') {
               // 只有一个通讯对象
-              os.push(new Device.CObject(Device.CObject.CWT, Device.CObject.UINT1, channelIndex, this.type))
+              os.push(new Device.CObject(Device.CObject.CWT, Device.CObject.UINT1, channelIndex, '开关'))
             } else {
               // 两个通讯对象
-              os.push(new Device.CObject(Device.CObject.CWT, Device.CObject.UINT1, channelIndex, this.type))
-              os.push(new Device.CObject(Device.CObject.CWT, Device.CObject.UINT1, channelIndex, this.type))
+              os.push(new Device.CObject(Device.CObject.CWT, Device.CObject.UINT1, channelIndex, '开关[短按]'))
+              os.push(new Device.CObject(Device.CObject.CWT, Device.CObject.UINT1, channelIndex, '开关[长按]'))
             }
           }
         } else if (this.type === '2') {
@@ -201,12 +234,18 @@
           ds = Device.merge(this.dimmer, 10)
           if (this.dimmer.r1 === '0') { // 调光+开关
             // 两个通讯对象
-            os.push(new Device.CObject(Device.CObject.CWT, Device.CObject.UINT1, channelIndex, this.type))
-            os.push(new Device.CObject(Device.CObject.CT, Device.CObject.UINT4, channelIndex, this.type))
+            os.push(new Device.CObject(Device.CObject.CWT, Device.CObject.UINT1, channelIndex, '开关/调光[开关]'))
+            os.push(new Device.CObject(Device.CObject.CT, Device.CObject.UINT4, channelIndex, '开关/调光[调光]'))
           } else {
             // 只有调光
-            os.push(new Device.CObject(Device.CObject.CT, Device.CObject.UINT4, channelIndex, this.type))
+            os.push(new Device.CObject(Device.CObject.CT, Device.CObject.UINT4, channelIndex, '开关/调光[只调光]'))
           }
+        } else if (this.type === '3') {
+          // 窗帘
+          ds = Device.merge(this.curtain, 7)
+          // 两个通讯对象
+          os.push(new Device.CObject(Device.CObject.CWT, Device.CObject.UINT1, channelIndex, '窗帘[上移/下降]'))
+          os.push(new Device.CObject(Device.CObject.CT, Device.CObject.UINT1, channelIndex, '窗帘[停止]'))
         }
 
         // 合并
