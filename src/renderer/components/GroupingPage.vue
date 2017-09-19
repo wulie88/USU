@@ -62,7 +62,7 @@
     </div>
    </div>
   </section>
-  <group-model :parentGroup="activedGroup" @submitGroupModel="receivedSubmitFromClild" @cancelGroupModel="receivedCancelFromClild" v-if="showModel"></group-model>
+  <group-module :parentGroup="activedGroup" @submitGroupModel="receivedSubmitFromClild" @cancelGroupModel="receivedCancelFromClild" v-if="showModel"></group-module>
 
   <footer class="toolbar toolbar-footer">
     <div class="toolbar-actions">
@@ -71,7 +71,7 @@
       </button>
 
       <button @click="save" class="btn btn-primary pull-right">
-        写入
+        烧录
       </button>
     </div>
   </footer>
@@ -80,9 +80,9 @@
 
 <script>
   import Device from '@/services/device'
-  import GroupModel from './GroupingPage/GroupModel'
+  import GroupModule from './GroupingPage/GroupModule'
   export default {
-    components: { GroupModel },
+    components: { GroupModule },
     data () {
       return {
         showModel: false,

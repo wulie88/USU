@@ -44,23 +44,20 @@
           data: {0: '开启', 1: '关闭', 2: '反转', 3: '发送2bit固定值', 4: '发送1bit固定值'},
           val: 2
         }, {
-          type: 'select',
+          type: 'input',
           name: 'ABSendKey',
           title: 'A+B发送值',
-          data: {0: '开启', 1: '关闭', 2: '反转', 3: '发送2bit固定值', 4: '发送1bit固定值'},
-          val: 2
+          val: 0
         }, {
-          type: 'select',
+          type: 'input',
           name: 'BCSendKey',
           title: 'B+C发送值',
-          data: {0: '开启', 1: '关闭', 2: '反转', 3: '发送2bit固定值', 4: '发送1bit固定值'},
-          val: 2
+          val: 0
         }, {
-          type: 'select',
+          type: 'input',
           name: 'CDSendKey',
           title: 'C+D发送值',
-          data: {0: '开启', 1: '关闭', 2: '反转', 3: '发送2bit固定值', 4: '发送1bit固定值'},
-          val: 2
+          val: 0
         }]
       }
     },

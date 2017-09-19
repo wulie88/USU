@@ -27,26 +27,52 @@
         </div>
       </div>
     </div>
+    <div class="form-merge">
+      <div class="form-merge-item">
+        <div class="form-group">
+          <label>串口</label>
+          <input v-model="port" type="text" class="form-control">
+        </div>
+      </div>
+      <div class="form-merge-item">
+        <div class="form-group">
+          <label>确认写入</label>
+          <button @click="write" type="button" class="form-control btn btn-primary">写入</button>
+        </div>
+      </div>
+      <div class="form-merge-item">
+        <div class="form-group">
+          <label>&nbsp;</label>
+          <button @click="restartDevice" type="button" class="form-control btn btn-warning">重启设备</button>
+        </div>
+      </div>
+    </div>
     <div v-for="item in items" class="form-group">
-	    <label>{{item.name}}</label>
-	    <input :value="item | dump" type="text" class="form-control">
-	  </div>
+      <label>{{item.name}}</label>
+      <input :value="item | dump" type="text" class="form-control">
+    </div>
     <footer class="form-footer">
-      <button type="button" class="form-control btn btn-form" @click="restart">重新开始</button>
+      <button type="button" class="form-control btn btn-form" @click="reset">重新开始</button>
     </footer>
   </form>
+  <console-module :lines="consoleLines" @closeConsole="receivedCloseFromClild" v-if="showModel"></console-module>
 </div>
 </template>
 
 <script>
   import Device from '@/services/device'
+  import ConsoleModule from './ResultPage/ConsoleModule'
   export default {
+    components: { ConsoleModule },
     data () {
       return {
         darea: 1,
         dline: 1,
         dbus: 13,
-        items: []
+        items: [],
+        port: 'COM3',
+        showModel: false,
+        consoleLines: []
       }
     },
     computed: {
@@ -63,9 +89,14 @@
       console.log(this.items)
     },
     methods: {
-      restart: function () {
+      reset: function () {
         this.$router.replace('/')
-      }
+      },
+      receivedCloseFromClild: function () {
+        this.showModel = false
+      },
+      restartDevice: function () { },
+      write: function () {}
     },
     filters: {
       dump: function (d) {
