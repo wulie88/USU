@@ -110,7 +110,7 @@
       save () {
         // group
         let groups = []
-        let index = 0
+        let index = 1
         this.groups.forEach(function (g) {
           if (g.level !== 3) {
             return
