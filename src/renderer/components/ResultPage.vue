@@ -61,7 +61,6 @@
 
 <script>
   import Device from '@/services/device'
-  import downloader from '@/services/downloader'
   import ConsoleModule from './ResultPage/ConsoleModule'
   export default {
     components: { ConsoleModule },
@@ -98,15 +97,9 @@
       },
       restartDevice: function () { },
       write: function () {
-        this.showModel = true
         let lines = []
         this.items.forEach((item) => {
           lines.push(item.dump())
-        })
-        downloader.write(this.port, lines, (wrote) => {
-          this.consoleLines.push('写入: ' + wrote)
-        }, (received) => {
-          this.consoleLines.push('接收: ' + received)
         })
       }
     },

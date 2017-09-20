@@ -68,15 +68,22 @@
         let CDKey = this.formData[2].val
         let a = ABKey << 0 | BCKey << 1 | CDKey << 2
         let ds = [a, parseInt(this.formData[3].val), parseInt(this.formData[4].val), parseInt(this.formData[5].val), parseInt(this.formData[6].val), parseInt(this.formData[7].val), 0, 0, 0]
+        let buttonSendKey = this.formData[4].val
+        let dt = Device.CObject.UINT1
+        if (buttonSendKey === '3') {
+          dt = Device.CObject.UINT2
+        } else if (buttonSendKey === '4') {
+          dt = Device.CObject.UINT8
+        }
         let os = []
         if (ABKey) {
-          os.push(new Device.CObject(Device.CObject.CWT, Device.CObject.UINT1, Device.CObject.BelongToCombine, 'ABKey'))
+          os.push(new Device.CObject(Device.CObject.CWT, dt, Device.CObject.BelongToCombine, 'ABKey'))
         }
         if (BCKey) {
-          os.push(new Device.CObject(Device.CObject.CWT, Device.CObject.UINT1, Device.CObject.BelongToCombine, 'BCKey'))
+          os.push(new Device.CObject(Device.CObject.CWT, dt, Device.CObject.BelongToCombine, 'BCKey'))
         }
         if (CDKey) {
-          os.push(new Device.CObject(Device.CObject.CWT, Device.CObject.UINT1, Device.CObject.BelongToCombine, 'CDKey'))
+          os.push(new Device.CObject(Device.CObject.CWT, dt, Device.CObject.BelongToCombine, 'CDKey'))
         }
         console.log(ds)
         this.$emit('submitFrameConfig', new Device.FrameConfig(this.name, ds, os))

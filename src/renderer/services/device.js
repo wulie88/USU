@@ -263,7 +263,7 @@ CGroup.prototype.codeAddr = function (sub) {
     parent = parent.parent
   }
   addr = addr.slice(1)
-  let ds = [addr[0] << 3 | addr[1], addr[2]]
+  let ds = [addr[2], [addr[0] << 3 | addr[1]]
   console.log('codeAddr', addr, ds)
   return ds
 }
@@ -325,7 +325,8 @@ function crc16 (bytes) {
 var pi = function (ds) {
   var s = []
   for (var i = 0; i < ds.length; i++) {
-    s.push(ds[i].toString(16))
+    let ch = ds[i].toString(16)
+    s.push((ch.length === 1 ? '0' + ch : ch).toUpperCase())
   }
 
   return s.join(' ')
