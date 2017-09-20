@@ -201,7 +201,9 @@
       stringDataType: function (index) {
         let d = {}
         d[Device.CObject.UINT1] = 'UINT1'
+        d[Device.CObject.UINT2] = 'UINT2'
         d[Device.CObject.UINT4] = 'UINT4'
+        d[Device.CObject.UINT8] = 'UINT8'
         return d[index]
       },
       groupAddrs: function (obj) {

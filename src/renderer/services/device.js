@@ -263,8 +263,7 @@ CGroup.prototype.codeAddr = function (sub) {
     parent = parent.parent
   }
   addr = addr.slice(1)
-  let ds = [addr[2], [addr[0] << 3 | addr[1]]
-  console.log('codeAddr', addr, ds)
+  let ds = [addr[2], addr[0] << 3 | addr[1]]
   return ds
 }
 CGroup.prototype.addSub = function (sub) {

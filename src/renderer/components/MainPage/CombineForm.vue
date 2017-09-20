@@ -41,7 +41,7 @@
           type: 'select',
           name: 'buttonSendKey',
           title: '按键发送值',
-          data: {0: '开启', 1: '关闭', 2: '反转', 3: '发送2bit固定值', 4: '发送1bit固定值'},
+          data: {0: '开启', 1: '关闭', 2: '反转', 3: '发送2bit固定值', 4: '发送1byte固定值'},
           val: 2
         }, {
           type: 'input',
