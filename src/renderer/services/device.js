@@ -25,11 +25,15 @@ var Frame = function (comment, command, data) {
 Frame.Index = 0
 Frame.CM_SetAddr = 0xa1
 Frame.CM_SetConfig = 0xa3
+Frame.CM_SetReboot = 0x5a
 Frame.SetConfig = function (comment, data) {
   return new Frame(comment, Frame.CM_SetConfig, [Addr0, Addr1].concat(data))
 }
 Frame.SetAddr = function (comment) {
   return new Frame(comment, Frame.CM_SetAddr, [Addr0, Addr1])
+}
+Frame.SetReboot = function (comment) {
+  return new Frame(comment, Frame.CM_SetReboot, [Addr0, Addr1])
 }
 
 var FrameConfig = function (name, originalData, objs) {
@@ -57,6 +61,14 @@ var FrameAddr = function () {
 }
 FrameAddr.prototype.dump = function () {
   let f1 = Frame.SetAddr(this.name)
+  console.log(this.name, pi(f1))
+  return pi(f1)
+}
+var FrameReboot = function () {
+  this.name = 'reboot'
+}
+FrameReboot.prototype.dump = function () {
+  let f1 = Frame.SetReboot(this.name)
   console.log(this.name, pi(f1))
   return pi(f1)
 }
@@ -344,7 +356,7 @@ var merge = function (ds, length) {
 var Manager = function () {
   this.reset()
 }
-Manager.Names = ['addr', 'general', 'channelA', 'channelB', 'channelC', 'channelD', 'combine', 'group', 'group2objs']
+Manager.Names = ['addr', 'reboot', 'general', 'channelA', 'channelB', 'channelC', 'channelD', 'combine', 'group', 'group2objs']
 Manager.prototype.reset = function () {
   this.configs = [] // JSON.parse(window.localStorage.getItem('configs')) || {}
 }
@@ -377,6 +389,7 @@ Manager.prototype.setAddr = function (addr0, addr1) {
   Addr0 = addr0
   Addr1 = addr1
   this.update('addr', new FrameAddr())
+  this.update('reboot', new FrameReboot())
 }
 Manager.prototype.dump = function () {
   var that = this
