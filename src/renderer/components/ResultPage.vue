@@ -31,7 +31,9 @@
       <div class="form-merge-item">
         <div class="form-group">
           <label>串口</label>
-          <input v-model="port" type="text" class="form-control">
+          <select v-model="port" class="form-control">
+            <option v-for="p in ports" :value="p">{{p}}</option>
+          </select>
         </div>
       </div>
       <div class="form-merge-item">
@@ -61,6 +63,7 @@
 
 <script>
   import Device from '@/services/device'
+  import Downloader from '@/services/downloader'
   import ConsoleModule from './ResultPage/ConsoleModule'
   export default {
     components: { ConsoleModule },
@@ -70,7 +73,8 @@
         dline: 1,
         dbus: 13,
         items: [],
-        port: 'COM3',
+        port: '/dev/cu.wchusbserial1470',
+        ports: [],
         showModel: false,
         consoleLines: []
       }
@@ -86,6 +90,9 @@
     },
     mounted: function () {
       this.items = Device.manager.dump()
+      Downloader.list((ps) => {
+        this.ports = ps
+      })
       console.log(this.items)
     },
     methods: {
@@ -97,15 +104,21 @@
       },
       restartDevice: function () { },
       write: function () {
+        this.showModel = true
         let lines = []
         this.items.forEach((item) => {
           lines.push(item.dump())
+        })
+        Downloader.write(this.port, lines, (line) => {
+          this.consoleLines.push('写入: ' + line)
+        }, (line) => {
+          this.consoleLines.push('接收: ' + line)
         })
       }
     },
     filters: {
       dump: function (d) {
-        return d.dump()
+        return d.print()
       }
     }
   }

@@ -54,6 +54,11 @@ FrameConfig.prototype.dump = function () {
   })
   let f1 = Frame.SetConfig(ff.title, ff.dump())
   console.log(this.name, pi(f1))
+  return f1
+}
+FrameConfig.prototype.print = function () {
+  let f1 = this.dump()
+  console.log(this.name, pi(f1))
   return pi(f1)
 }
 var FrameAddr = function () {
@@ -62,6 +67,11 @@ var FrameAddr = function () {
 FrameAddr.prototype.dump = function () {
   let f1 = Frame.SetAddr(this.name)
   console.log(this.name, pi(f1))
+  return f1
+}
+FrameAddr.prototype.print = function () {
+  let f1 = this.dump()
+  console.log(this.name, pi(f1))
   return pi(f1)
 }
 var FrameReboot = function () {
@@ -69,6 +79,11 @@ var FrameReboot = function () {
 }
 FrameReboot.prototype.dump = function () {
   let f1 = Frame.SetReboot(this.name)
+  console.log(this.name, pi(f1))
+  return f1
+}
+FrameReboot.prototype.print = function () {
+  let f1 = this.dump()
   console.log(this.name, pi(f1))
   return pi(f1)
 }
@@ -389,7 +404,6 @@ Manager.prototype.setAddr = function (addr0, addr1) {
   Addr0 = addr0
   Addr1 = addr1
   this.update('addr', new FrameAddr())
-  this.update('reboot', new FrameReboot())
 }
 Manager.prototype.dump = function () {
   var that = this
